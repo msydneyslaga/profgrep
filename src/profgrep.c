@@ -40,6 +40,7 @@ int main(int argc, char **argv)
 		readline(&inp);
 
 		if(pg_search(&inp, NULL) > 0)
+			;
 
 		pgbuf_destroy(&inp);
 	}
