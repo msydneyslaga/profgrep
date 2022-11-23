@@ -15,6 +15,7 @@ add_project_arguments(cc.get_supported_arguments([
     '-Wno-unused-parameter',
     '-pedantic',
     '-D_POSIX_C_SOURCE=200809L',
+    '-Wno-missing-field-initializers',
 ]), language: 'c')
 
 
@@ -40,6 +41,7 @@ endif
 # dependencies
 assert(cc.has_header('tbs/types.h'))
 incdir = include_directories('inc')
+argp_dep = dependency('libargp')
 
 
 # this is just for me :)
@@ -54,6 +56,7 @@ profgrep_src = files(
     'src/profgrep.c',
     'src/buffer.c',
     'src/search.c',
+    'src/censor.c',
 )
 
 # MAIN EXECUTABLE
@@ -61,6 +64,7 @@ executable(
     'profgrep',
     profgrep_src,
     include_directories : incdir,
+    dependencies : argp_dep,
 )
 
 # DOCS
