@@ -3,6 +3,8 @@
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
+#include <time.h>
+#include <sysexits.h>
 #include <argp.h>
 
 #include <tbs/types.h>
@@ -11,37 +13,14 @@
 #include <profgrep/search.h>
 #include <profgrep/buffer.h>
 #include <profgrep/censor.h>
+#include <profgrep/dictionary.h>
+#include <profgrep/readln.h>
 
 #define isPrintable(c) \
 	(c >= 33 && c <= 126)
 
-struct options
-{
-	FILE **files;
-	uint _files_cx;
-	uint _files_alloc;
-
-	pg_search_callback searchcb;
-	pg_match_callback matchcb;
-};
-
-char *readline(pg_buf *inp, FILE *fp)
-{
-	while(!feof(fp))
-	{
-		utf8c c = fgetc(fp);
-
-		pgbuf_resize(inp);
-		inp->buf[inp->cx++] = c;
-
-		if(c == '\n')
-			break;
-	}
-
-	return inp->buf;
-}
-
-int pg_file(FILE *fp, pg_search_callback scb, pg_match_callback mcb)
+int pg_file(FILE *fp, ahocora_pair *dictionary, pg_search_callback scb,
+		pg_match_callback mcb)
 {
 	while(!feof(fp))
 	{
@@ -49,7 +28,7 @@ int pg_file(FILE *fp, pg_search_callback scb, pg_match_callback mcb)
 
 		assert(readline(&inp, fp) != NULL);
 
-		pg_search(&inp, scb, mcb);
+		pg_search(&inp, dictionary, scb, mcb);
 
 		pgbuf_destroy(&inp);
 	}
@@ -63,6 +42,28 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
 
 	switch(key)
 	{
+		case 'd':
+		{
+			FILE *fp = fopen(arg, "r");
+
+			if(!fp)
+			{
+				fprintf(stderr, "profgrep: failed to open file '%s'\n", arg);
+				exit(EX_OSFILE);
+			}
+
+			opt->dictionary = parse_dictionary(fp);
+
+			if(opt->dictionary == NULL)
+			{
+				fprintf(stderr,
+						"profgrep: error parsing dictionary file '%s'\n",
+						arg);
+				exit(EX_SOFTWARE);
+			}
+
+			break;
+		}
 		case 'C':
 		{
 			if(!arg)
@@ -70,7 +71,12 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
 			else if(!strcmp(arg, "stars"))
 				opt->matchcb = censor_stars;
 			else if(!strcmp(arg, "grawlix"))
+			{
+				srand(time(NULL));
 				opt->matchcb = censor_grawlix;
+			}
+			else
+				argp_error(state, "unknown censor method");
 			break;
 		}
 		case ARGP_KEY_ARG:
@@ -117,6 +123,7 @@ int main(int argc, char **argv)
 		{ "censor",			'C', "METHOD",	OPTION_ARG_OPTIONAL,	"censor matched words"
 																	"\nMETHOD may be 'stars' or 'grawlix' (default: 'stars')"},
 		{ "print-all",		'p', 0,			0,						"print lines regardless of whether they matched the dictionary" },
+		{ "dictionary",		'd', "FILE",	0,						"use file of newline-seperated strings as dictionary" },
 		{ 0 },
 	};
 
@@ -129,6 +136,7 @@ int main(int argc, char **argv)
 	};
 	opt.files[0] = stdin;
 	opt.files[1] = NULL;
+	opt.dictionary = default_dictionary;
 
 	uint argcx = 1;
 	struct argp argp = {options, parse_opt, "[FILE...]"};
@@ -138,8 +146,10 @@ int main(int argc, char **argv)
 	/* foreach file */
 	for(FILE **fps = opt.files, *fp = *fps; fp != NULL; fp = *(++fps))
 	{
-		pg_file(fp, opt.searchcb, opt.matchcb);
+		pg_file(fp, opt.dictionary, opt.searchcb, opt.matchcb);
+		fclose(fp);
 	}
-	/* pg_file(stdin); */
+
+	free(opt.files);
 }
 

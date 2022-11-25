@@ -57,6 +57,8 @@ profgrep_src = files(
     'src/buffer.c',
     'src/search.c',
     'src/censor.c',
+    'src/dictionary.c',
+    'src/readln.c',
 )
 
 # MAIN EXECUTABLE

@@ -13,11 +13,11 @@
 /*
  * https://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/02/Small02.pdf
  */
-u32 pg_search(pg_buf *inp, pg_search_callback scb, pg_match_callback mcb)
+u32 pg_search(pg_buf *inp, ahocora_pair *dictionary, pg_search_callback scb,
+		pg_match_callback mcb)
 {
 	bool matched = false;
 	u32 match_cx = 0;
-	init_dictionary();
 
 	u64 i;
 	ahocora_pair *w;
@@ -27,10 +27,11 @@ u32 pg_search(pg_buf *inp, pg_search_callback scb, pg_match_callback mcb)
 		char c = inp->buf[i];
 
 		/* iterate through wordlist */
-		for(w = wordlist; w->str != NULL; w++)
+		for(w = dictionary; w->str != NULL; w++)
 		{
 			if(w->str[w->index] == c)
 			{
+				fprintf(stderr, "indexed '%c' of potential '%s'\n", c, w->str);
 				w->index++;
 				assert(w->index <= w->len);
 
@@ -39,6 +40,7 @@ u32 pg_search(pg_buf *inp, pg_search_callback scb, pg_match_callback mcb)
 					match_cx++;
 					if(mcb)
 						mcb(inp, inp->buf + i - w->len + 1, w->len);
+					w->index = 0;
 				}
 			}
 			else

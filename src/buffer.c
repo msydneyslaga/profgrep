@@ -5,9 +5,9 @@
 pg_buf pgbuf_init()
 {
 	pg_buf buf;
-	buf.buf		= malloc(1024);
 	buf.alloc	= 256;
 	buf.cx		= 0;
+	buf.buf		= malloc(buf.alloc);
 
 	assert(buf.buf != NULL);
 
