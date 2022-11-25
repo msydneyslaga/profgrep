@@ -13,7 +13,9 @@
 static bool comparechar_nocase(char a, char b)
 {
 	/* convert a and b to lowercase before comparison,
-	 * if they are uppercase */
+	 * if they are uppercase
+	 * ('a' - 'A' == 32 == 0x20)*/
+
 	a = (a >= 'A' && a <= 'Z') ? a + 0x20 : a;
 	b = (b >= 'A' && b <= 'Z') ? b + 0x20 : b;
 

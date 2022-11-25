@@ -144,7 +144,7 @@ int main(int argc, char **argv)
 																	"\nMETHOD may be 'stars' or 'grawlix' (default: 'stars')"},
 		{ "print-all",		'p', 0,			0,						"print lines regardless of whether they matched the dictionary" },
 		{ "dictionary",		'd', "FILE",	0,						"use file of comma-seperated strings as dictionary. commas may be escaoed with '\\'" },
-		{ "ignore-case",	'i', 0,			0,						"match characters regardless of case" },
+		{ "ignore-case",	'i', 0,			0,						"match characters regardless of case. by default, profgrep is case-sensitive" },
 		{ 0 },
 	};
 
