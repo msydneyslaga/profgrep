@@ -16,6 +16,6 @@ void pgbuf_destroy(pg_buf *inp);
 
 void pgbuf_resize(pg_buf *inp);
 
-uint pgbuf_available(pg_buf *buf);
+void pgbuf_clear(pg_buf *inp);
 
 #endif

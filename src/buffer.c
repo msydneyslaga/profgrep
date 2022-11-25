@@ -34,10 +34,10 @@ void pgbuf_destroy(pg_buf *buf)
 	buf->cx		= 0;
 }
 
-uint pgbuf_available(pg_buf *buf)
+void pgbuf_clear(pg_buf *b)
 {
-	assert(buf->buf != NULL);
-
-	return (buf->alloc - buf->cx);
+	assert(b != NULL);
+	assert(b->buf != NULL);
+	b->cx = 0;
 }
 

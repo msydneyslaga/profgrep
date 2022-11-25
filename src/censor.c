@@ -12,7 +12,6 @@
 void censor_stars(pg_buf *line, char *where, uint len)
 {
 	memset(where, '*', len);
-	write(STDOUT_FILENO, line->buf, line->cx);
 }
 
 void grawlix_seed(pg_buf *b)
@@ -33,7 +32,6 @@ void censor_grawlix(pg_buf *line, char *where, uint len)
 	assert(line != NULL);
 
 	const char grawlix[] = "*@#$%!&";
-	printf("{'%.*s', %d}", len, where, len);
 
 	for(uint b = 0; b < len; b += sizeof(grawlix) - 1)
 	{
@@ -50,6 +48,5 @@ void censor_grawlix(pg_buf *line, char *where, uint len)
 			while(memchr(set, r, i) && i < sizeof(grawlix) - 1);
 			set[i] = r;
 		}
-		printf("[%.*s]", len, set);
 	}
 }

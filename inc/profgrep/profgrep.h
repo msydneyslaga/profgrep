@@ -24,11 +24,14 @@ struct options
 	FILE **files;
 	uint _files_cx;
 	uint _files_alloc;
-
 	pg_search_callback searchcb;
 	pg_match_callback matchcb;
 
 	ahocora_pair *dictionary;
+
+	bool caseSensitive;
 };
+
+extern struct options opt;
 
 #endif

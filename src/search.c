@@ -10,6 +10,21 @@
 #include <profgrep/dictionary.h>
 
 
+static bool comparechar_nocase(char a, char b)
+{
+	/* convert a and b to lowercase before comparison,
+	 * if they are uppercase */
+	a = (a >= 'A' && a <= 'Z') ? a + 0x20 : a;
+	b = (b >= 'A' && b <= 'Z') ? b + 0x20 : b;
+
+	return (a == b);
+}
+
+static bool comparechar_case(char a, char b)
+{
+	return (a == b);
+}
+
 /*
  * https://web.stanford.edu/class/archive/cs/cs166/cs166.1166/lectures/02/Small02.pdf
  */
@@ -18,6 +33,13 @@ u32 pg_search(pg_buf *inp, ahocora_pair *dictionary, pg_search_callback scb,
 {
 	bool matched = false;
 	u32 match_cx = 0;
+	bool (*comparechar)(char, char);
+
+	if(opt.caseSensitive)
+		comparechar = comparechar_case;
+	else
+		comparechar = comparechar_nocase;
+
 
 	u64 i;
 	ahocora_pair *w;
@@ -29,9 +51,8 @@ u32 pg_search(pg_buf *inp, ahocora_pair *dictionary, pg_search_callback scb,
 		/* iterate through wordlist */
 		for(w = dictionary; w->str != NULL; w++)
 		{
-			if(w->str[w->index] == c)
+			if(comparechar(w->str[w->index], c))
 			{
-				fprintf(stderr, "indexed '%c' of potential '%s'\n", c, w->str);
 				w->index++;
 				assert(w->index <= w->len);
 

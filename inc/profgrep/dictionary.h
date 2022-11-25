@@ -18,25 +18,6 @@ extern ahocora_pair default_dictionary[];
 
 ahocora_pair *parse_dictionary(FILE *fp);
 
-/* static ahocora_pair *init_dictionary() */
-/* { */
-/* 	memset(wordlist, 0, sizeof(wordlist)); */
-/* 	u32 i = 0; */
-/* 	for(const char **w = dictionary; *w != NULL; w += 1) */
-/* 	{ */
-/* 		u16 l; */
-/* 		for(l = 0; (*w)[l] != 0; l++) */
-/* 			; */
-
-/* 		wordlist[i].str = *w; */
-/* 		wordlist[i].len = l; */
-
-/* 		i++; */
-/* 	} */
-
-/* 	assert(wordlist[0].index == 0); */
-
-/* 	return wordlist; */
-/* } */
+void destroy_dictionary(ahocora_pair *dict);
 
 #endif

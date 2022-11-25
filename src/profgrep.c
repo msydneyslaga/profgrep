@@ -19,6 +19,8 @@
 #define isPrintable(c) \
 	(c >= 33 && c <= 126)
 
+struct options opt;
+
 int pg_file(FILE *fp, ahocora_pair *dictionary, pg_search_callback scb,
 		pg_match_callback mcb)
 {
@@ -42,13 +44,18 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
 
 	switch(key)
 	{
+		case 'i':
+		{
+			opt->caseSensitive = false;
+			break;
+		}
 		case 'd':
 		{
 			FILE *fp = fopen(arg, "r");
 
 			if(!fp)
 			{
-				fprintf(stderr, "profgrep: failed to open file '%s'\n", arg);
+				argp_error(state, "no such file '%s'", arg);
 				exit(EX_OSFILE);
 			}
 
@@ -56,9 +63,7 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
 
 			if(opt->dictionary == NULL)
 			{
-				fprintf(stderr,
-						"profgrep: error parsing dictionary file '%s'\n",
-						arg);
+				argp_error(state, "error parsing dictionary '%s'", arg);
 				exit(EX_SOFTWARE);
 			}
 
@@ -115,6 +120,21 @@ void printbuf(pg_buf *buf)
 	write(STDOUT_FILENO, buf->buf, buf->cx);
 }
 
+void pg_setdefaultopt()
+{
+	opt._files_alloc = 2;
+	opt._files_cx = 0;
+	opt.files = calloc(2, sizeof(FILE*));
+
+	opt.searchcb = printbuf;
+
+	opt.files[0] = stdin;
+	opt.files[1] = NULL;
+
+	opt.dictionary = default_dictionary;
+	opt.caseSensitive = true;
+}
+
 int main(int argc, char **argv)
 {
 	struct argp_option options[] =
@@ -123,20 +143,13 @@ int main(int argc, char **argv)
 		{ "censor",			'C', "METHOD",	OPTION_ARG_OPTIONAL,	"censor matched words"
 																	"\nMETHOD may be 'stars' or 'grawlix' (default: 'stars')"},
 		{ "print-all",		'p', 0,			0,						"print lines regardless of whether they matched the dictionary" },
-		{ "dictionary",		'd', "FILE",	0,						"use file of newline-seperated strings as dictionary" },
+		{ "dictionary",		'd', "FILE",	0,						"use file of comma-seperated strings as dictionary. commas may be escaoed with '\\'" },
+		{ "ignore-case",	'i', 0,			0,						"match characters regardless of case" },
 		{ 0 },
 	};
 
-	struct options opt =
-	{
-		._files_alloc = 2,
-		._files_cx = 0,
-		.files = calloc(2, sizeof(FILE*)),
-		.searchcb = printbuf,
-	};
-	opt.files[0] = stdin;
-	opt.files[1] = NULL;
-	opt.dictionary = default_dictionary;
+	/* its 4 am im so tired im gonna drop out */
+	pg_setdefaultopt();
 
 	uint argcx = 1;
 	struct argp argp = {options, parse_opt, "[FILE...]"};
@@ -150,6 +163,8 @@ int main(int argc, char **argv)
 		fclose(fp);
 	}
 
+	if(opt.dictionary != default_dictionary)
+		free(opt.dictionary);
 	free(opt.files);
 }
 
