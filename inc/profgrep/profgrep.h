@@ -9,7 +9,7 @@
 #include <profgrep/dictionary.h>
 
 /* used as a reminder we're working in UTF-8 octets, and NOT ASCII chars */
-typedef unsigned char utf8o;
+typedef char utf8o;
 
 #ifndef NDEBUG
 #	define dbgprintf(...) \

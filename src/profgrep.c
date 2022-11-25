@@ -117,7 +117,8 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
 
 void printbuf(pg_buf *buf)
 {
-	write(STDOUT_FILENO, buf->buf, buf->cx);
+	/* write(STDOUT_FILENO, buf->buf, buf->cx); */
+	fwrite(buf->buf, 1, buf->cx - 0, stdout);
 }
 
 void pg_setdefaultopt()
