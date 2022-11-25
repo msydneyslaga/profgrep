@@ -30,8 +30,11 @@ struct options
 	ahocora_pair *dictionary;
 
 	bool caseSensitive;
+	u8 verbosity;
 };
 
 extern struct options opt;
+extern u64 match_cx;
+extern u64 bytesRead;
 
 #endif

@@ -15,11 +15,14 @@
 #include <profgrep/censor.h>
 #include <profgrep/dictionary.h>
 #include <profgrep/readln.h>
+#include <profgrep/printfv.h>
 
 #define isPrintable(c) \
 	(c >= 33 && c <= 126)
 
 struct options opt;
+u64 match_cx = 0;
+u64 bytesRead = 0;
 
 int pg_file(FILE *fp, ahocora_pair *dictionary, pg_search_callback scb,
 		pg_match_callback mcb)
@@ -28,7 +31,11 @@ int pg_file(FILE *fp, ahocora_pair *dictionary, pg_search_callback scb,
 	{
 		pg_buf inp = pgbuf_init();
 
-		assert(readline(&inp, fp) != NULL);
+#ifdef NDEBUG
+		readln(&inp, fp);
+#else
+		assert(readln(&inp, fp) != NULL);
+#endif
 
 		pg_search(&inp, dictionary, scb, mcb);
 
@@ -47,6 +54,11 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
 		case 'i':
 		{
 			opt->caseSensitive = false;
+			break;
+		}
+		case 'V':
+		{
+			opt->verbosity++;
 			break;
 		}
 		case 'd':
@@ -134,6 +146,7 @@ void pg_setdefaultopt()
 
 	opt.dictionary = default_dictionary;
 	opt.caseSensitive = true;
+	opt.verbosity = 0;
 }
 
 int main(int argc, char **argv)
@@ -146,13 +159,13 @@ int main(int argc, char **argv)
 		{ "print-all",		'p', 0,			0,						"print lines regardless of whether they matched the dictionary" },
 		{ "dictionary",		'd', "FILE",	0,						"use file of comma-seperated strings as dictionary. commas may be escaoed with '\\'" },
 		{ "ignore-case",	'i', 0,			0,						"match characters regardless of case. by default, profgrep is case-sensitive" },
+		{ "verbose",		'V', 0,			0,						"print extra information" },
 		{ 0 },
 	};
 
 	/* its 4 am im so tired im gonna drop out */
 	pg_setdefaultopt();
 
-	uint argcx = 1;
 	struct argp argp = {options, parse_opt, "[FILE...]"};
 
 	argp_parse(&argp, argc, argv, 0, 0, &opt);
@@ -163,6 +176,12 @@ int main(int argc, char **argv)
 		pg_file(fp, opt.dictionary, opt.searchcb, opt.matchcb);
 		fclose(fp);
 	}
+
+	printfv(1, "\n------------------------------------\n");
+	printfv(1, "filtered: %zu bytes\tmatched: %zu\n", bytesRead, match_cx);
+	printfv(2, "dictionary: ");
+	for(ahocora_pair *w = opt.dictionary; w->str; w++)
+		printfv(2, "'%s', ", w->str);
 
 	if(opt.dictionary != default_dictionary)
 		destroy_dictionary(opt.dictionary);

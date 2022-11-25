@@ -1,7 +1,8 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <profgrep/readln.h>
 
-char *readline(pg_buf *inp, FILE *fp)
+char *readln(pg_buf *inp, FILE *fp)
 {
 	while(!feof(fp))
 	{
@@ -12,6 +13,7 @@ char *readline(pg_buf *inp, FILE *fp)
 		inp->buf[inp->cx++] = c;
 
 		pgbuf_resize(inp);
+		bytesRead++;
 
 		if(c == '\n')
 			break;

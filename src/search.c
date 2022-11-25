@@ -8,6 +8,7 @@
 #include <profgrep/search.h>
 #include <profgrep/buffer.h>
 #include <profgrep/dictionary.h>
+#include <profgrep/printfv.h>
 
 
 static bool comparechar_nocase(char a, char b)
@@ -33,8 +34,6 @@ static bool comparechar_case(char a, char b)
 u32 pg_search(pg_buf *inp, ahocora_pair *dictionary, pg_search_callback scb,
 		pg_match_callback mcb)
 {
-	bool matched = false;
-	u32 match_cx = 0;
 	bool (*comparechar)(char, char);
 
 	if(opt.caseSensitive)
@@ -43,9 +42,8 @@ u32 pg_search(pg_buf *inp, ahocora_pair *dictionary, pg_search_callback scb,
 		comparechar = comparechar_nocase;
 
 
-	u64 i;
 	ahocora_pair *w;
-	for(i = 0; i < inp->cx; i++)
+	for(u64 i = 0; i < inp->cx; i++)
 	{
 		/* TOCON: have c be a pointer? */
 		char c = inp->buf[i];
@@ -53,6 +51,10 @@ u32 pg_search(pg_buf *inp, ahocora_pair *dictionary, pg_search_callback scb,
 		/* iterate through wordlist */
 		for(w = dictionary; w->str != NULL; w++)
 		{
+			printfv(3, "comparechar(): %d: ",
+					comparechar(w->str[w->index], c));
+			printfv(3, "(%s){%c == %c} %d\n", w->str, w->str[w->index], c,
+					w->index);
 			if(comparechar(w->str[w->index], c))
 			{
 				w->index++;
