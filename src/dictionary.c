@@ -49,6 +49,7 @@ static ahocora_pair read_word(FILE *fp)
 	if(feof(fp))
 	{
 		ahocora_pair r = { .str = NULL };
+		free(b);
 		return r;
 	}
 
@@ -110,5 +111,10 @@ ahocora_pair *parse_dictionary(FILE *fp)
 
 void destroy_dictionary(ahocora_pair *dict)
 {
+	/* free all strings, then the containing array */
+	for(ahocora_pair *w = dict; w->str != NULL; w++)
+		free((void*)w->str);
 
+	free(dict);
 }
+

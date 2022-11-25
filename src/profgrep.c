@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 	}
 
 	if(opt.dictionary != default_dictionary)
-		free(opt.dictionary);
+		destroy_dictionary(opt.dictionary);
 	free(opt.files);
 }
 
