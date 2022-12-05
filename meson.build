@@ -44,14 +44,12 @@ incdir = include_directories('inc')
 argp_dep = dependency('libargp')
 
 
-# this is just for me :)
 install_symlink(
     'profgrep',
     install_dir : meson.source_root(),
     pointing_to : join_paths(meson.project_build_root(), 'profgrep')
 )
 
-# compile without the main() file to link with tests
 profgrep_src = files(
     'src/profgrep.c',
     'src/buffer.c',
@@ -62,7 +60,6 @@ profgrep_src = files(
     'src/printfv.c',
 )
 
-# MAIN EXECUTABLE
 executable(
     'profgrep',
     profgrep_src,
@@ -70,7 +67,6 @@ executable(
     dependencies : argp_dep,
 )
 
-# DOCS
 # subdir('doc')
 subdir('tst')
 
